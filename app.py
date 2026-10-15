@@ -30,7 +30,7 @@ The problem must have exactly one integer solution. The answer is only the integ
 Show correct algebraic steps in solution. Do not use markdown fences.'''
         try:
             client = genai.Client(api_key=api_key)
-            response = client.models.generate_content(model='gemini-3.8-flash', contents=prompt)
+            response = client.models.generate_content(model='gemini-3.1-flash', contents=prompt)
             raw = response.text.strip()
             raw = re.sub(r'^```(?:json)?\s*|\s*```$', '', raw)
             data = json.loads(raw)
