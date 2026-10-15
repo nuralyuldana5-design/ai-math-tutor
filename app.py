@@ -58,7 +58,10 @@ if st.button("Generate new problem", type="primary"):
         prompt = f'''You are a careful Grade 7 mathematics teacher. Create ONE linear equation in one variable for difficulty {level}.
 Foundation: x+a=b or ax=b, small integer solution, simple step-by-step hint.
 Standard: ax+b=c, integer solution, moderate difficulty.
-Advanced: brackets and variables on both sides, multi-step reasoning, integer solution.
+Advanced: Create a challenging linear equation with brackets and variables on both sides.
+Choose an integer value of x FIRST.
+Then construct the equation so that this integer is the exact solution.
+Verify the equation before returning JSON.
 Return ONLY a valid JSON object with string keys: problem, hint, solution, answer.
 Use plain text equation syntax such as 3(2x-5)-4=2(x+3)+1, not LaTeX.
 The problem must have exactly one integer solution. The answer is only the integer (e.g. "7").
