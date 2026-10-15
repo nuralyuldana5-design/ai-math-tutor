@@ -49,24 +49,37 @@ def verify_equation(problem):
     return int(result[0]), sp.latex(sp.Eq(lhs, rhs, evaluate=False))
 
 
+
 if st.button("Generate new problem", type="primary"):
     st.session_state.problem = None
     st.session_state.current_level = None
+
     if not api_key:
-        st.error("Add GEMINI_API_KEY in Streamlit Secrets before generating problems.")
+        st.error("Add GEMINI_API_KEY in Streamlit Secrets.")
     else:
-        prompt = f'''You are a careful Grade 7 mathematics teacher. Create ONE linear equation in one variable for difficulty {level}.
-Foundation: x+a=b or ax=b, small integer solution, simple step-by-step hint.
-Standard: ax+b=c, integer solution, moderate difficulty.
-Advanced: Create a challenging linear equation with brackets and variables on both sides.
-Choose an integer value of x FIRST.
-Then construct the equation so that this integer is the exact solution.
-Verify the equation before returning JSON.
-Return ONLY a valid JSON object with string keys: problem, hint, solution, answer.
-Use plain text equation syntax such as 3(2x-5)-4=2(x+3)+1, not LaTeX.
-The problem must have exactly one integer solution. The answer is only the integer (e.g. "7").
-Show correct algebraic steps in solution. Do not change the original equation.
+        previous_problems = st.session_state.get(
+            "previous_problems", []
+        )
+
+        prompt = f'''You are a careful Grade 7 mathematics teacher.
+Create ONE NEW linear equation for difficulty level: {level}.
+
+Foundation: x+a=b or ax=b, small integer solution.
+Standard: ax+b=c, moderate difficulty, integer solution.
+Advanced: brackets and variables on both sides, multi-step reasoning.
+
+IMPORTANT RULES:
+1. Choose an integer solution FIRST.
+2. Construct an equation with exactly one solution.
+3. Do not repeat equations from this list: {previous_problems}.
+4. Provide a hint and a correct step-by-step solution.
+5. Keep the original equation unchanged.
+
+Return ONLY valid JSON with string keys:
+problem, hint, solution, answer.
+The answer must be an integer written as a string.
 Do not use markdown fences.'''
+
         try:
             client = genai.Client(api_key=api_key)
             response = client.models.generate_content(model="gemini-3.1-flash-lite", contents=prompt)
@@ -81,6 +94,12 @@ Do not use markdown fences.'''
             data["verified_answer"] = actual_answer
             data["equation_latex"] = equation_latex
             st.session_state.problem = data
+            if "previous_problems" not in st.session_state:
+                st.session_state.previous_problems = []
+
+            st.session_state.previous_problems.append(
+                data["problem"]
+            )
             st.session_state.current_level = level
         except Exception as exc:
             st.error(f"Could not generate a valid problem: {exc}")
